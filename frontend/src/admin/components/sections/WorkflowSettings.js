@@ -4,7 +4,20 @@ const WorkflowSettings = ({ settings, onChange }) => {
   const w = settings.workflow || {};
   const set = (key, value) => onChange('workflow', key, value);
 
-  const [showToken, setShowToken] = useState(false);
+  const [showToken, setShowToken]       = useState(false);
+  const [newOrigin, setNewOrigin]       = useState('');
+  const allowedOrigins = Array.isArray(w.allowedOrigins) ? w.allowedOrigins : [];
+
+  const addOrigin = () => {
+    const val = newOrigin.trim().replace(/\/+$/, ''); // strip trailing slash
+    if (!val || allowedOrigins.includes(val)) { setNewOrigin(''); return; }
+    set('allowedOrigins', [...allowedOrigins, val]);
+    setNewOrigin('');
+  };
+
+  const removeOrigin = (idx) => {
+    set('allowedOrigins', allowedOrigins.filter((_, i) => i !== idx));
+  };
 
   const apiBaseUrl  = w.apiBaseUrl  || 'http://localhost:3001/api/v1';
   const typebotId   = w.typebotId   || '';
@@ -129,6 +142,66 @@ const WorkflowSettings = ({ settings, onChange }) => {
             Send subsequent user messages using the <code>sessionId</code> from the first response.
           </span>
         </div>
+      </div>
+
+      {/* ── Allowed Origins (widget whitelist) ── */}
+      <div className="ap-group">
+        <h3 className="ap-group-title">🔒 Allowed Domains (Whitelist)</h3>
+        <p className="ap-hint" style={{ marginBottom: 12 }}>
+          When this list is <strong>empty</strong> the widget loads on <em>any</em> website.
+          Add one or more origins below to restrict it to those domains only.
+          Use the full origin: <code>https://example.com</code> (no trailing slash, no path).
+        </p>
+
+        {/* existing entries */}
+        {allowedOrigins.length > 0 ? (
+          <ul style={{ listStyle: 'none', padding: 0, marginBottom: 12 }}>
+            {allowedOrigins.map((o, i) => (
+              <li key={i} style={{
+                display: 'flex', alignItems: 'center', gap: 8,
+                padding: '6px 10px', borderRadius: 8,
+                background: '#f0f4ff', border: '1px solid #d0d8f0',
+                marginBottom: 6, fontFamily: 'monospace', fontSize: 13,
+              }}>
+                <span style={{ flex: 1, wordBreak: 'break-all', color: '#1a1a2e' }}>{o}</span>
+                <button
+                  className="ap-btn ap-btn-reset"
+                  style={{ padding: '3px 10px', fontSize: 12, flex: 'none' }}
+                  onClick={() => removeOrigin(i)}
+                >✕ Remove</button>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <div style={{
+            padding: '10px 14px', borderRadius: 8,
+            background: '#fffbe6', border: '1px solid #ffe58f',
+            fontSize: 12, color: '#7d5a00', marginBottom: 12,
+          }}>
+            ⚠️ No restrictions — widget will load on <strong>all</strong> websites.
+          </div>
+        )}
+
+        {/* add new entry */}
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          <input
+            className="ap-text-input"
+            value={newOrigin}
+            onChange={e => setNewOrigin(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && addOrigin()}
+            placeholder="https://your-website.com"
+            spellCheck={false}
+            style={{ flex: 1, fontFamily: 'monospace', fontSize: 13 }}
+          />
+          <button
+            className="ap-btn ap-btn-save"
+            style={{ flex: 'none', padding: '8px 16px' }}
+            onClick={addOrigin}
+          >+ Add</button>
+        </div>
+        <span className="ap-hint" style={{ marginTop: 6 }}>
+          Press Enter or click Add. Example: <code>https://sclchatbot.digiiq.ai</code>
+        </span>
       </div>
     </div>
   );

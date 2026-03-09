@@ -48,9 +48,10 @@ const defaultSettings = {
     typingDuration: 1500, // minimum ms to show typing dots (0 = instant)
   },
   workflow: {
-    apiBaseUrl:   'http://localhost:3001/api/v1',
-    typebotId:    'n7r13wu6szxrc82w46klq78e',
-    bearerToken:  '6YvtqmdZZR8BflsEaHSmRZcB',
+    apiBaseUrl:     '',
+    typebotId:      '',
+    bearerToken:    '',
+    allowedOrigins: [],
   },
 };
 

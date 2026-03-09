@@ -6,9 +6,9 @@ import ChatService from '../services/ChatService';
 import '../styles/chatbot.css';
 
 const DEFAULT_WORKFLOW = {
-  apiBaseUrl:  process.env.REACT_APP_API_BASE_URL  || 'http://localhost:3001/api/v1',
-  typebotId:   process.env.REACT_APP_TYPEBOT_ID    || 'n7r13wu6szxrc82w46klq78e',
-  bearerToken: process.env.REACT_APP_BEARER_TOKEN  || '6YvtqmdZZR8BflsEaHSmRZcB',
+  apiBaseUrl:  process.env.REACT_APP_API_BASE_URL  || '',
+  typebotId:   process.env.REACT_APP_TYPEBOT_ID    || '',
+  bearerToken: process.env.REACT_APP_BEARER_TOKEN  || '',
 };
 
 // Returns true when running on a mobile/touch device or narrow viewport
@@ -60,11 +60,26 @@ const DEFAULT_BEHAVIOR = {
   splashEnabled:  true,
 };
 
+// Returns false if the current page origin is not in the allowedOrigins list.
+// An empty / missing list means allow everywhere.
+function isAllowedOnCurrentPage(allowedOrigins) {
+  if (!allowedOrigins || allowedOrigins.length === 0) return true;
+  const currentOrigin = window.location.origin; // e.g. "https://example.com"
+  return allowedOrigins.some(entry => {
+    const p = (entry || '').trim().replace(/\/+$/, '');
+    if (!p) return false;
+    return currentOrigin === p;
+  });
+}
+
 const ChatWidget = ({ widgetSettings = {}, userId = null, userName = null }) => {
   const appearance = { ...DEFAULT_APPEARANCE, ...(widgetSettings.appearance || {}) };
   const content    = { ...DEFAULT_CONTENT,    ...(widgetSettings.content    || {}) };
   const behavior   = { ...DEFAULT_BEHAVIOR,   ...(widgetSettings.behavior   || {}) };
   const workflow   = { ...DEFAULT_WORKFLOW,   ...(widgetSettings.workflow   || {}) };
+
+  // Whitelist check — hide widget entirely if current origin is not allowed
+  if (!isAllowedOnCurrentPage(workflow.allowedOrigins)) return null;
 
   // Apply workflow config to ChatService whenever settings change
   useEffect(() => { ChatService.configure(workflow); }, [workflow.apiBaseUrl, workflow.typebotId, workflow.bearerToken]);
