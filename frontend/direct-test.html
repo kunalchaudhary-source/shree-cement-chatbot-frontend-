@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot Widget - Direct Test</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            margin: 0;
+            padding: 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        .status-box {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            padding: 30px;
+            border-radius: 16px;
+            margin: 30px 0;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 10px;
+            animation: pulse 2s infinite;
+        }
+        .loading { background-color: #ffa726; }
+        .ready { background-color: #4caf50; animation: none; }
+        .error { background-color: #f44336; animation: none; }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .arrow {
+            position: fixed;
+            bottom: 100px;
+            right: 100px;
+            font-size: 2rem;
+            animation: bounce 1s infinite;
+        }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        .debug-info {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            text-align: left;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🤖 Chatbot Widget Test</h1>
+        
+        <div class="status-box">
+            <h3>
+                <span class="status-indicator loading" id="statusDot"></span>
+                Status: <span id="statusText">Initializing...</span>
+            </h3>
+            <p id="statusDescription">Loading chatbot widget...</p>
+        </div>
+        
+        <div class="status-box">
+            <h3>✅ Expected Features</h3>
+            <p>🔵 Purple chat icon in bottom-right corner</p>
+            <p>💬 Click icon to open chat window</p>
+            <p>⌨️ Type messages and get responses</p>
+            <p>📱 Responsive design for all devices</p>
+        </div>
+        
+        <div class="debug-info" id="debugInfo">
+            <strong>Debug Console:</strong><br>
+            <div id="debugLog">Starting initialization...</div>
+        </div>
+    </div>
+    
+    <div class="arrow" id="arrow" style="display: none;">
+        👆 Click Here!
+    </div>
+    
+    <!-- Chatbot Container -->
+    <div id="chatbot-root"></div>
+    
+    <!-- Load Chatbot Widget -->
+    <script src="chatbot-widget.js"></script>
+    <script>
+        const statusDot = document.getElementById('statusDot');
+        const statusText = document.getElementById('statusText');
+        const statusDescription = document.getElementById('statusDescription');
+        const debugLog = document.getElementById('debugLog');
+        const arrow = document.getElementById('arrow');
+        
+        function log(message) {
+            console.log(message);
+            debugLog.innerHTML += '<br>' + new Date().toLocaleTimeString() + ': ' + message;
+            debugLog.scrollTop = debugLog.scrollHeight;
+        }
+        
+        function updateStatus(status, description, type = 'loading') {
+            statusText.textContent = status;
+            statusDescription.textContent = description;
+            statusDot.className = 'status-indicator ' + type;
+            log(`Status: ${status} - ${description}`);
+        }
+        
+        function checkForChatIcon() {
+            const chatIcon = document.querySelector('.chat-icon');
+            if (chatIcon) {
+                updateStatus('Ready!', 'Chatbot icon found and ready to use', 'ready');
+                arrow.style.display = 'block';
+                return true;
+            }
+            return false;
+        }
+        
+        function initializeChatbot() {
+            log('Checking if initChatbot function is available...');
+            
+            if (typeof window.initChatbot === 'function') {
+                log('initChatbot function found! Initializing...');
+                updateStatus('Initializing', 'Starting chatbot widget...');
+                
+                try {
+                    const chatbot = window.initChatbot({
+                        containerId: 'chatbot-root'
+                    });
+                    log('Chatbot initialized successfully');
+                    
+                    // Check if icon appeared after a short delay
+                    setTimeout(() => {
+                        if (checkForChatIcon()) {
+                            log('Chatbot icon is visible and ready');
+                        } else {
+                            updateStatus('Issue', 'Chatbot initialized but icon not visible', 'error');
+                            log('ERROR: Chatbot initialized but icon not found in DOM');
+                        }
+                    }, 500);
+                    
+                } catch (error) {
+                    log('ERROR during initialization: ' + error.message);
+                    updateStatus('Error', 'Failed to initialize chatbot', 'error');
+                }
+            } else {
+                log('initChatbot function not available, retrying...');
+                updateStatus('Loading', 'Waiting for chatbot script to load...');
+                setTimeout(initializeChatbot, 200);
+            }
+        }
+        
+        // Start initialization
+        log('Page loaded, starting chatbot initialization');
+        updateStatus('Loading', 'Loading chatbot script...');
+        
+        // Wait a bit for script to load then start checking
+        setTimeout(initializeChatbot, 100);
+        
+        // Fallback: try again after 3 seconds if not ready
+        setTimeout(() => {
+            if (!checkForChatIcon()) {
+                log('Fallback: Attempting re-initialization after 3 seconds');
+                initializeChatbot();
+            }
+        }, 3000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,32 @@
+{
+  "name": "embeddable-chatbot",
+  "version": "1.0.0",
+  "description": "Embeddable React chatbot widget",
+  "main": "src/index.js",
+  "scripts": {
+    "build": "webpack --mode=production",
+    "dev": "webpack serve --mode=development",
+    "build-dev": "webpack --mode=development",
+    "test": "node -e \"console.log('Starting test server...'); const http = require('http'); const fs = require('fs'); const path = require('path'); const server = http.createServer((req, res) => { const filePath = req.url === '/' ? 'test.html' : req.url.slice(1); const ext = path.extname(filePath); const contentType = ext === '.js' ? 'text/javascript' : ext === '.css' ? 'text/css' : 'text/html'; try { const content = fs.readFileSync(filePath); res.writeHead(200, { 'Content-Type': contentType }); res.end(content); } catch { res.writeHead(404); res.end('Not found'); } }); server.listen(8080, () => console.log('Test server running at http://localhost:8080')); \""
+  },
+  "keywords": ["chatbot", "widget", "embeddable", "react"],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.22.0",
+    "@babel/preset-env": "^7.22.0",
+    "@babel/preset-react": "^7.22.0",
+    "babel-loader": "^9.1.0",
+    "css-loader": "^6.8.0",
+    "dotenv": "^16.3.0",
+    "html-webpack-plugin": "^5.5.0",
+    "style-loader": "^3.3.0",
+    "webpack": "^5.88.0",
+    "webpack-cli": "^5.1.0",
+    "webpack-dev-server": "^4.15.0"
+  }
+}

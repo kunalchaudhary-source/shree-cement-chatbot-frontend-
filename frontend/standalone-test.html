@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Standalone Chatbot Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f0f0f0;
+        }
+        .test-info {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .debug-box {
+            background: #000;
+            color: #0f0;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: monospace;
+            margin: 10px 0;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-info">
+        <h1>🤖 Standalone Chatbot Test</h1>
+        <p>This page tests the chatbot widget independently of webpack dev server.</p>
+        <p><strong>What to look for:</strong></p>
+        <ul>
+            <li>A red debug container in the bottom-right corner</li>
+            <li>A purple chat icon inside the container</li>
+            <li>Console logs showing initialization</li>
+        </ul>
+        
+        <div class="debug-box" id="debugOutput">
+Initializing...
+        </div>
+    </div>
+    
+    <div id="chatbot-root"></div>
+    
+    <script>
+        function debug(msg) {
+            const output = document.getElementById('debugOutput');
+            output.textContent += '\\n' + new Date().toLocaleTimeString() + ': ' + msg;
+            console.log('[DEBUG]', msg);
+        }
+        
+        debug('Page loaded');
+        debug('Looking for chatbot script...');
+        
+        // First check if we can load React components directly
+        function testChatbotLoading() {
+            debug('Testing chatbot loading...');
+            
+            if (typeof window.initChatbot === 'function') {
+                debug('✅ initChatbot function found!');
+                try {
+                    const result = window.initChatbot();
+                    debug('✅ Chatbot initialized successfully');
+                    debug('Return value: ' + JSON.stringify(Object.keys(result || {})));
+                    
+                    // Check DOM after init
+                    setTimeout(() => {
+                        const widget = document.querySelector('.chatbot-widget');
+                        const icon = document.querySelector('.chat-icon');
+                        debug('Widget element: ' + (widget ? '✅ Found' : '❌ Not found'));
+                        debug('Icon element: ' + (icon ? '✅ Found' : '❌ Not found'));
+                        
+                        if (widget) {
+                            debug('Widget styles: ' + window.getComputedStyle(widget).position + ' ' + window.getComputedStyle(widget).zIndex);
+                        }
+                    }, 1000);
+                    
+                } catch (error) {
+                    debug('❌ Error initializing: ' + error.message);
+                }
+            } else {
+                debug('❌ initChatbot function not found');
+                debug('Available window properties: ' + Object.keys(window).filter(k => k.includes('chat') || k.includes('Chat')).join(', '));
+            }
+        }
+        
+        // Try loading immediately and also after delays
+        testChatbotLoading();
+        setTimeout(testChatbotLoading, 1000);
+        setTimeout(testChatbotLoading, 3000);
+    </script>
+    
+    <!-- Load the chatbot script -->
+   
+</body>
+</html>

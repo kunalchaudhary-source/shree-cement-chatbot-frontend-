@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot Test - Live Demo</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .status {
+            background: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+        .status h2 {
+            color: #333;
+            margin-top: 0;
+        }
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        .status-ready {
+            background: #4caf50;
+        }
+        .status-loading {
+            background: #ff9800;
+            animation: pulse 1s infinite;
+        }
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        .test-controls {
+            background: #fff;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 14px;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        .instructions {
+            background: #e8f5e8;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        .chatbot-notice {
+            position: fixed;
+            bottom: 100px;
+            right: 30px;
+            background: #333;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 14px;
+            max-width: 250px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            z-index: 9999;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="status">
+            <h2>🤖 Chatbot Widget - Live Test</h2>
+            <p>
+                <span class="status-indicator" id="statusDot"></span>
+                <strong>Status:</strong> <span id="status">Loading...</span>
+            </p>
+            <p id="description">Initializing chatbot widget...</p>
+        </div>
+        
+        <div class="test-controls">
+            <h3>🎮 Test Controls</h3>
+            <button class="btn" onclick="testShow()">Show Chatbot</button>
+            <button class="btn" onclick="testHide()">Hide Chatbot</button>
+            <button class="btn" onclick="testToggle()">Toggle Chatbot</button>
+            <button class="btn" onclick="reinitialize()">Reinitialize</button>
+        </div>
+        
+        <div class="instructions">
+            <h3>📋 How to Test</h3>
+            <ol>
+                <li><strong>Look for the chat icon</strong> in the bottom-right corner</li>
+                <li><strong>Click the icon</strong> to open the chat window</li>
+                <li><strong>Type a message</strong> and press Enter or click Send</li>
+                <li><strong>Try the controls above</strong> to test different functions</li>
+            </ol>
+            <p><strong>Expected Behavior:</strong></p>
+            <ul>
+                <li>Chat icon appears as a floating button</li>
+                <li>Clicking opens a chat window</li>
+                <li>Messages send to the Typebot API</li>
+                <li>Bot responds with messages</li>
+                <li>Window closes when X is clicked</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="chatbot-notice" id="chatbotNotice" style="display: none;">
+        👆 Click the chat icon to start testing!
+    </div>
+    
+    <!-- Chatbot Widget Container -->
+    <div id="chatbot-root"></div>
+    
+    <!-- Load the built chatbot widget -->
+    <script src="dist/chatbot-widget.js"></script>
+    <script>
+        let chatbotInstance = null;
+        
+        function updateStatus(status, description, isReady = false) {
+            document.getElementById('status').textContent = status;
+            document.getElementById('description').textContent = description;
+            const dot = document.getElementById('statusDot');
+            dot.className = 'status-indicator ' + (isReady ? 'status-ready' : 'status-loading');
+        }
+        
+        function showNotice() {
+            document.getElementById('chatbotNotice').style.display = 'block';
+            setTimeout(() => {
+                document.getElementById('chatbotNotice').style.display = 'none';
+            }, 5000);
+        }
+        
+        function initializeChatbot() {
+            try {
+                if (typeof initChatbot !== 'undefined') {
+                    chatbotInstance = initChatbot();
+                    updateStatus('Ready!', 'Chatbot is loaded and ready to use. Look for the chat icon in the bottom-right corner.', true);
+                    showNotice();
+                    return true;
+                } else {
+                    updateStatus('Script Loading...', 'Chatbot script is still loading. Please wait...', false);
+                    return false;
+                }
+            } catch (error) {
+                updateStatus('Error', 'Failed to initialize chatbot: ' + error.message, false);
+                console.error('Chatbot initialization error:', error);
+                return false;
+            }
+        }
+        
+        function testShow() {
+            if (chatbotInstance && chatbotInstance.show) {
+                chatbotInstance.show();
+            }
+        }
+        
+        function testHide() {
+            if (chatbotInstance && chatbotInstance.hide) {
+                chatbotInstance.hide();
+            }
+        }
+        
+        function testToggle() {
+            // Simulate clicking the chat icon
+            const chatIcon = document.querySelector('.chat-icon');
+            if (chatIcon) {
+                chatIcon.click();
+            }
+        }
+        
+        function reinitialize() {
+            if (chatbotInstance && chatbotInstance.destroy) {
+                chatbotInstance.destroy();
+            }
+            setTimeout(() => {
+                initializeChatbot();
+            }, 500);
+        }
+        
+        // Initialize on page load
+        updateStatus('Initializing...', 'Setting up chatbot widget...', false);
+        
+        // Try to initialize immediately
+        if (!initializeChatbot()) {
+            // If not ready, try again in intervals
+            const initInterval = setInterval(() => {
+                if (initializeChatbot()) {
+                    clearInterval(initInterval);
+                }
+            }, 1000);
+            
+            // Stop trying after 10 seconds
+            setTimeout(() => {
+                clearInterval(initInterval);
+                updateStatus('Timeout', 'Failed to load chatbot script. Please refresh the page.', false);
+            }, 10000);
+        }
+    </script>
+</body>
+</html>

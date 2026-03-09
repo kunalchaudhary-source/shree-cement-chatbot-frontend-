@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <title>Your Website</title>
+    <style>
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+        background: #f0f2f8;
+        color: #222;
+        min-height: 100vh;
+      }
+
+      /* ── Top bar ── */
+      .site-header {
+        background: linear-gradient(90deg, #012C8F 0%, #0032A1 100%);
+        color: #fff;
+        padding: 14px 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      }
+      .site-header h1 {
+        font-size: clamp(15px, 4vw, 20px);
+        font-weight: 700;
+        letter-spacing: -0.3px;
+      }
+      .site-header span {
+        font-size: 12px;
+        background: rgba(255,255,255,0.18);
+        border-radius: 20px;
+        padding: 4px 10px;
+        white-space: nowrap;
+      }
+
+      /* ── Main content ── */
+      .site-main {
+        max-width: 760px;
+        margin: 0 auto;
+        padding: 24px 16px 80px;
+      }
+
+      /* ── Hero card ── */
+      .hero-card {
+        background: #fff;
+        border-radius: 16px;
+        padding: 28px 24px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        text-align: center;
+        margin-bottom: 20px;
+      }
+      .hero-card h2 {
+        font-size: clamp(18px, 5vw, 26px);
+        font-weight: 800;
+        color: #012C8F;
+        margin-bottom: 10px;
+      }
+      .hero-card p {
+        font-size: clamp(13px, 3.5vw, 15px);
+        color: #555;
+        line-height: 1.6;
+      }
+
+      /* ── Info cards grid ── */
+      .cards-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 14px;
+        margin-bottom: 20px;
+      }
+      .info-card {
+        background: #fff;
+        border-radius: 14px;
+        padding: 20px 18px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+      }
+      .info-card .icon { font-size: 26px; margin-bottom: 8px; }
+      .info-card h3 { font-size: 14px; font-weight: 700; color: #012C8F; margin-bottom: 4px; }
+      .info-card p  { font-size: 12.5px; color: #666; line-height: 1.5; }
+
+      /* ── Snippet box ── */
+      .snippet-card {
+        background: #fff;
+        border-radius: 14px;
+        padding: 20px 18px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+      }
+      .snippet-card h3 { font-size: 14px; font-weight: 700; color: #333; margin-bottom: 12px; }
+      .snippet-card pre {
+        background: #f5f7ff;
+        border: 1px solid #e0e4f0;
+        border-radius: 8px;
+        padding: 14px;
+        font-size: 11.5px;
+        overflow-x: auto;
+        white-space: pre;
+        line-height: 1.6;
+        color: #1a1a2e;
+      }
+
+      /* ── Mobile tweaks ── */
+      @media (max-width: 480px) {
+        .site-main { padding: 16px 12px 80px; }
+        .hero-card  { padding: 22px 16px; }
+        .info-card  { padding: 16px 14px; }
+      }
+    </style>
+</head>
+<body>
+
+    <header class="site-header">
+      <h1>🤖 Chatbot Test Page</h1>
+      <span>Demo</span>
+    </header>
+
+    <main class="site-main">
+
+      <div class="hero-card">
+        <h2>Test Frontend Page</h2>
+        <p>This page demonstrates embedding the chatbot widget with a single line of script. Look for the widget button on the page!</p>
+      </div>
+
+      <div class="cards-grid">
+        <div class="info-card">
+          <div class="icon">⚡</div>
+          <h3>One-line Setup</h3>
+          <p>Drop a single &lt;script&gt; tag into any page to embed the chatbot instantly.</p>
+        </div>
+        <div class="info-card">
+          <div class="icon">🎨</div>
+          <h3>Fully Customisable</h3>
+          <p>Colors, position, avatar, greeting — all configurable from the admin panel.</p>
+        </div>
+        <div class="info-card">
+          <div class="icon">📱</div>
+          <h3>Mobile Ready</h3>
+          <p>The widget automatically adapts to phones and tablets with a fullscreen chat view.</p>
+        </div>
+      </div>
+
+      <div class="snippet-card">
+        <h3>📋 Integration Snippet</h3>
+        <pre>&lt;script
+  src="https://your-domain.com/chatbot-widget.min.js"
+  data-user-id="YOUR_USER_ID"
+  data-user-name="User Name"
+  data-auto-init="true"
+&gt;&lt;/script&gt;</pre>
+      </div>
+
+    </main>
+
+    <!-- Chatbot Widget - Single Line Integration -->
+    <script
+      src="http://localhost:4000/chatbot-widget.js"
+      data-user-id="50f3c454-bee4-4ffd-8757-14424992335e"
+      data-user-name="Rahul"
+      data-auto-init="true"
+    ></script>
+
+</body>
+</html>

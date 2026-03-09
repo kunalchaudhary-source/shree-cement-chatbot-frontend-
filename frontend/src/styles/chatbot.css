@@ -1,0 +1,581 @@
+@import url('https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,500;0,700;0,800;1,400&display=swap');
+
+/* ═══════════════════════════════════════
+   CHATBOT WIDGET – SCHEME SAATHI DESIGN
+═══════════════════════════════════════ */
+
+/* ── Widget container ── */
+.chatbot-widget {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 10000;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+}
+
+
+/* -- Breathing keyframe -- */
+@keyframes askBreathe {
+  0%   { transform: scale(1);    }
+  50%  { transform: scale(1.08); }
+  100% { transform: scale(1);    }
+}
+
+/* -- Trigger icon � "Ask" button -- */
+.ask-icon-wrap {
+  position: relative;
+  width: 48.13px;
+  height: 48.13px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  filter: drop-shadow(0 4px 12px rgba(0,0,0,0.18));
+  transition: transform 0.2s ease;
+}
+.ask-icon-wrap.ask-breathing {
+  animation: askBreathe 2.4s ease-in-out infinite;
+}
+.ask-icon-wrap:hover {
+  animation-play-state: paused;
+  transform: scale(1.1);
+}
+
+.ask-ring {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.ask-inner {
+  position: absolute;
+  inset: 3px;
+  background: #ffffff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ask-text {
+  width: 31.13px;
+  height: 46.2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+  color: #1a237e;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  white-space: nowrap;
+}
+
+/* Close (X) button when chat is open */
+.ask-icon-close {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #e53935;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.25);
+  transition: transform 0.2s ease, background 0.2s ease;
+  position: relative;
+}
+.ask-icon-close:hover { transform: scale(1.06); background: #c62828; }
+
+.ask-badge {
+  position: absolute;
+  top: -4px; right: -4px;
+  background: #ff4444;
+  color: #fff;
+  border-radius: 50%;
+  width: 18px; height: 18px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 700;
+}
+
+/* --------------------------------------
+   CHAT WINDOW
+-------------------------------------- */
+.ss-window {
+  position: absolute;
+  bottom: 80px;
+  right: 0;
+  width: min(413px, calc(100vw - 40px));
+  height: min(698px, calc(100vh - 110px));
+  background: var(--chat-bg, #f0f4ff);
+  border-radius: 12px;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.18);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: ssUp 0.25s ease-out;
+}
+/* Window opens downward when trigger is at the top */
+.chatbot-widget.is-top .ss-window {
+  bottom: auto;
+  top: 80px;
+  animation: ssDown 0.25s ease-out;
+}
+/* Window anchors to the left edge when trigger is on the left */
+.chatbot-widget.is-left .ss-window {
+  right: auto;
+  left: 0;
+}
+@keyframes ssDown {
+  from { opacity: 0; transform: translateY(-16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes ssUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0);    }
+}
+
+/* --------------------------------------
+   SPLASH / LOADING SCREEN
+-------------------------------------- */
+.ss-splash {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 20px;
+}
+.ss-splash-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+}
+
+/* Oval container � sized to the big oval + mascot above it */
+.ss-splash-oval-wrap {
+  position: relative;
+  width: 180px;
+  height: 190px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+/* Dark oval � animates from small (51.12�28.22) to big (142.97�78.91), slightly tilted */
+@keyframes ovalGrow {
+  0%   {
+    width: 51.12px;  height: 28.22px;
+    transform: translateX(-50%) rotate(-6deg) scale(1);
+    opacity: 0.7;
+  }
+  70%  {
+    width: 142.97px; height: 78.91px;
+    transform: translateX(-50%) rotate(-6deg) scale(1.04);
+    opacity: 1;
+  }
+  100% {
+    width: 142.97px; height: 78.91px;
+    transform: translateX(-50%) rotate(-6deg) scale(1);
+    opacity: 1;
+  }
+}
+.ss-splash-oval {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  /* start state matches 0% keyframe */
+  width: 51.12px;
+  height: 28.22px;
+  border-radius: 50%;
+  background: linear-gradient(180deg, #01298A 0%, #00113A 100%);
+  animation: ovalGrow 0.8s cubic-bezier(0.34, 1.45, 0.64, 1) 0.1s forwards;
+}
+
+/* Mascot image sits on top of the oval */
+.ss-splash-mascot {
+  position: relative;
+  z-index: 1;
+  width: 160px;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 14px rgba(0,0,0,0.25));
+  animation: ssFadeIn 0.5s ease-out 0.15s both;
+}
+
+@keyframes ssFadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0);    }
+}
+
+.ss-splash-name {
+  font-size: 22px;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: -0.3px;
+  text-align: center;
+  animation: ssFadeIn 0.5s ease-out 0.3s both;
+}
+
+/* --------------------------------------
+   HEADER  � white bg, purple text
+-------------------------------------- */
+.ss-header {
+  padding: 16px 16px 12px 16px;
+  background: transparent;
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+  flex-shrink: 0;
+}
+
+/* Row 1: avatar + Hello!! + close button */
+.ss-hdr-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+
+/* Avatar in the header � no circle crop, image displays fully */
+.ss-hdr-avatar {
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.ss-hdr-avatar-img {
+  height: 52px;
+  width: auto;
+  max-width: 64px;
+  object-fit: contain;
+  display: block;
+}
+.ss-hdr-avatar-initials {
+  width: 100%; height: 100%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px; font-weight: 700;
+  color: #ffffff;
+}
+
+/* "Hello!!" � large bold purple-gradient text, fills remaining space */
+.ss-hello {
+  flex: 1;
+  font-family: 'Lato', sans-serif;
+  font-size: 34px;
+  font-weight: 800;
+  font-style: normal;
+  line-height: 140%;
+  letter-spacing: 0;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Close button � gradient set via inline style, falls back to dark blue */
+.ss-close {
+  width: 30px; height: 30px;
+  background: linear-gradient(135deg, #012C8F 0%, #001F63 100%);
+  border: none;
+  border-radius: 50%;
+  color: #ffffff;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  padding: 0;
+  flex-shrink: 0;
+  align-self: flex-start;
+  margin-top: 2px;
+  transition: opacity 0.15s ease;
+}
+.ss-close:hover { opacity: 0.85; }
+
+.ss-hdr-name {
+  font-size: 14px;
+  color: var(--header-name-color, #000000);
+  font-weight: 400;
+  margin-bottom: 2px;
+  padding-left: 1px;
+}
+.ss-hdr-name strong { font-weight: 700; }
+
+.ss-hdr-tagline {
+  font-size: 14px;
+  color: var(--header-name-color, #000000);
+  line-height: 1.4;
+  padding-left: 1px;
+}
+
+/* --------------------------------------
+   MESSAGES
+-------------------------------------- */
+.ss-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px 14px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: transparent;
+}
+.ss-messages::-webkit-scrollbar       { width: 4px; }
+.ss-messages::-webkit-scrollbar-track { background: transparent; }
+.ss-messages::-webkit-scrollbar-thumb { background: #d1d5e0; border-radius: 4px; }
+
+.ss-msg {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+.ss-msg-bot  { justify-content: flex-start; }
+.ss-msg-user { justify-content: flex-end;   }
+
+/* Square rounded-rect bot avatar */
+.ss-msg-avatar {
+  width: 46px; height: 46px;
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Lato', sans-serif;
+  font-size: 21.05px; font-weight: 800;
+  color: #ffffff;
+  flex-shrink: 0;
+  letter-spacing: 0;
+  line-height: 110%;
+  text-align: center;
+}
+
+/* Square rounded-rect user avatar � matches bot avatar style */
+.ss-msg-user-avatar {
+  width: 46px; height: 46px;
+  border-radius: 12px;
+  color: #ffffff;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Lato', sans-serif;
+  font-size: 21.05px; font-weight: 800;
+  flex-shrink: 0;
+  letter-spacing: 0;
+  line-height: 110%;
+  text-align: center;
+}
+
+.ss-msg-body {
+  display: flex;
+  flex-direction: column;
+  max-width: 72%;
+}
+
+.ss-bubble {
+  padding: 10px 14px;
+  border-radius: 16px;
+  font-family: 'Lato', sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.4;
+  word-break: break-word;
+}
+.ss-bubble-bot {
+  background: var(--bot-bubble-bg, #EFEFEF);
+  color: var(--bot-bubble-color, #1a1a2e);
+  border-top-left-radius: 4px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+.ss-bubble-user {
+  border-top-right-radius: 4px;
+  color: #ffffff;
+}
+
+.ss-time {
+  font-size: 10px;
+  color: #aaaaaa;
+  margin-top: 3px;
+}
+.ss-time-bot  { text-align: left;  margin-left: 2px; }
+.ss-time-user { text-align: right; margin-right: 2px; }
+
+/* -- Choice buttons -- */
+.ss-choices {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 4px 0;
+  align-items: flex-end;
+}
+.ss-choice-btn {
+  background: var(--btn-bg, #ffffff);
+  border: 1.5px solid var(--btn-border, #0032A1);
+  border-radius: 20px;
+  padding: 10px 16px;
+  min-height: 46px;
+  font-size: 13.5px;
+  color: var(--btn-color, #0032A1);
+  cursor: pointer;
+  text-align: center;
+  width: 100%;
+  transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+  box-sizing: border-box;
+}
+/* Dynamic sizing: each button wraps its own text, right-aligned */
+.ss-choices-dynamic .ss-choice-btn {
+  width: auto;
+  align-self: flex-end;
+}
+/* Top-most choice sits next to the avatar � sharp top-right corner like user bubble */
+.ss-choices .ss-choice-btn:first-child {
+  border-top-right-radius: 4px;
+}
+/* Hover fill � only on real pointer devices (not touch screens) */
+@media (hover: hover) and (pointer: fine) {
+  .ss-choice-btn:hover:not(:disabled) {
+    background: var(--btn-border, #0032A1);
+    color: #fff;
+    border-color: transparent;
+  }
+}
+/* Touch press feedback */
+.ss-choice-btn:active:not(:disabled) {
+  background: var(--btn-border, #0032A1);
+  color: #fff;
+  border-color: transparent;
+}
+.ss-choice-btn:disabled:not(.ss-choice-selected) { cursor: default; }
+
+/* -- Typing dots -- */
+.ss-typing {
+  display: flex; align-items: center; gap: 4px;
+  padding: 3px 2px;
+}
+.ss-typing span {
+  width: 7px; height: 7px;
+  background: var(--typing-dot-color, #012A89);
+  border-radius: 50%;
+  animation: ssBounce 1.3s infinite;
+}
+.ss-typing span:nth-child(2) { animation-delay: 0.18s; }
+.ss-typing span:nth-child(3) { animation-delay: 0.36s; }
+@keyframes ssBounce {
+  0%,60%,100% { transform: translateY(0);    opacity: 0.45; }
+  30%          { transform: translateY(-7px); opacity: 1;    }
+}
+
+/* --------------------------------------
+   INPUT BAR
+-------------------------------------- */
+.ss-form {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 12px 12px;
+  background: transparent;
+  border-top: 1px solid rgba(0,0,0,0.06);
+  flex-shrink: 0;
+}
+.ss-input {
+  flex: 1;
+  background: #f2f3f8;
+  border: none;
+  border-radius: 22px;
+  padding: 10px 16px;
+  font-size: 14px;
+  color: #222;
+  outline: none;
+  transition: background 0.15s;
+}
+.ss-input::placeholder { color: #aaa; }
+.ss-input:focus        { background: #eaecf5; }
+.ss-input:disabled     { opacity: 0.6; cursor: not-allowed; }
+
+.ss-send {
+  width: 38px; height: 38px;
+  border: none;
+  border-radius: 50%;
+  background: #cccccc;
+  color: #ffffff;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.15s, transform 0.15s;
+  padding: 0;
+}
+.ss-send:not(:disabled):hover { transform: scale(1.08); }
+.ss-send:disabled              { background: #cccccc !important; cursor: not-allowed; }
+
+/* --------------------------------------
+   MOBILE LAYOUT  (.is-mobile on the widget root)
+   Triggered on touch devices or viewport = 480 px
+-------------------------------------- */
+
+/* -- Mobile: Ask button � same circle style as desktop, scaled to 38 � 38 -- */
+.ask-icon-mobile {
+  width:  38px !important;
+  height: 38px !important;
+}
+/* Full white circle inset inside the gradient ring � identical to desktop behaviour */
+.ask-icon-mobile .ask-inner {
+  position: absolute;
+  inset: 3px !important;
+  width:  auto;
+  height: auto;
+  top:    auto;
+  left:   auto;
+  border-radius: 50%;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+/* "Ask" text scaled for the smaller circle */
+.ask-icon-mobile .ask-text {
+  width:  auto;
+  height: auto;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: -0.2px;
+  color: #1a237e;
+  padding: 0;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+/* Cap mascot/custom images inside the mobile button */
+.ask-icon-mobile .ask-inner img {
+  max-width:  26px;
+  max-height: 26px;
+  object-fit: contain;
+}
+
+/* -- Mobile: fullscreen chat window -- */
+.is-mobile .ss-window {
+  position: fixed !important;
+  inset: 0 !important;
+  width:  100vw  !important;
+  height: 100dvh !important;
+  max-width:  unset !important;
+  min-height: unset !important;
+  border-radius: 0 !important;
+  bottom: auto !important;
+  right:  auto !important;
+  left:   0    !important;
+  top:    0    !important;
+  z-index: 99999 !important;
+  animation: ssMobileIn 0.22s ease-out !important;
+}
+@keyframes ssMobileIn {
+  from { opacity: 0; transform: translateY(100%); }
+  to   { opacity: 1; transform: translateY(0);    }
+}
+/* Splash also fullscreen on mobile */
+.is-mobile .ss-window.ss-splash {
+  border-radius: 0 !important;
+}
+
+/* Mobile hello size */
+.is-mobile .ss-hello {
+  font-size: 34.91px;
+}
+
+/* -- Responsive fallback for very small screens without JS -- */
+@media (max-width: 480px) {
+  .chatbot-widget:not(.is-mobile) .ss-window {
+    width: calc(100vw - 16px);
+    height: calc(100dvh - 90px);
+    right: 0;
+    bottom: 80px;
+  }
+  .chatbot-widget:not(.is-mobile) { right: 8px; bottom: 8px; }
+}
