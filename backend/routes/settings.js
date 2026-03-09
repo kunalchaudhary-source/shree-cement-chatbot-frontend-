@@ -42,6 +42,12 @@ router.put('/:userId', async (req, res) => {
        RETURNING settings, updated_at`,
       [req.params.userId, JSON.stringify(settings)]
     );
+
+    // Invalidate the CORS origin cache so new allowedOrigins take effect immediately
+    if (typeof req.app.locals.invalidateOriginCache === 'function') {
+      req.app.locals.invalidateOriginCache(req.params.userId);
+    }
+
     res.json({ settings: rows[0].settings, updated_at: rows[0].updated_at });
   } catch (err) {
     console.error('PUT /api/settings:', err.message);

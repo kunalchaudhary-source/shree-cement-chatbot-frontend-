@@ -1,6 +1,5 @@
 require('dotenv').config();
 const express = require('express');
-const cors    = require('cors');
 const { Pool } = require('pg');
 
 const usersRouter    = require('./routes/users');
@@ -13,24 +12,79 @@ const PORT = process.env.PORT || 5001;
 const DB_NAME = process.env.DB_NAME || 'chatbot_admin';
 
 // ── CORS ────────────────────────────────────────────────────────
-// ALLOWED_ORIGINS is a comma-separated list in .env
-// e.g. ALLOWED_ORIGINS=https://sclchatbot.digiiq.ai,http://localhost:4000
-const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || 'http://localhost:4000')
-  .split(',')
-  .map(o => o.trim())
-  .filter(Boolean);
+// ADMIN_ORIGINS: static list from .env — always allowed (admin panel, dev).
+// Widget routes (GET /api/settings/:userId, POST /api/logs/:userId) also
+// allow any origin that the user has whitelisted in their DB settings,
+// so customers never need a server config change.
+const ADMIN_ORIGINS = (process.env.ALLOWED_ORIGINS || 'http://localhost:4000')
+  .split(',').map(o => o.trim()).filter(Boolean);
 
-const corsOptions = {
-  origin: (origin, callback) => {
-    // Allow requests with no origin (server-to-server, curl, health checks)
-    if (!origin) return callback(null, true);
-    if (ALLOWED_ORIGINS.includes(origin)) return callback(null, true);
-    callback(new Error(`CORS: origin "${origin}" not allowed`));
-  },
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true,
-};
+// Fetch allowed origins for a userId from DB (cached briefly to avoid per-request queries)
+const _originCache = new Map(); // userId -> { origins: string[], exp: number }
+async function getUserAllowedOrigins(pool, userId) {
+  const now = Date.now();
+  const cached = _originCache.get(userId);
+  if (cached && cached.exp > now) return cached.origins;
+
+  try {
+    const { rows } = await pool.query(
+      `SELECT settings->'workflow'->'allowedOrigins' AS origins
+       FROM widget_settings WHERE user_id = $1`, [userId]
+    );
+    const origins = (rows[0]?.origins) || [];
+    _originCache.set(userId, { origins, exp: now + 60_000 }); // cache 60s
+    return origins;
+  } catch {
+    return [];
+  }
+}
+
+// Invalidate cache entry when settings are saved
+function invalidateOriginCache(userId) { _originCache.delete(userId); }
+
+// Dynamic CORS middleware factory — call with the lazily-resolved pool
+function buildCorsMiddleware(getPool) {
+  return async (req, res, next) => {
+    const origin = req.headers.origin;
+
+    // No origin (curl, server-to-server) — always allow
+    if (!origin) return next();
+
+    // Admin origins — always allow
+    if (ADMIN_ORIGINS.includes(origin)) {
+      res.setHeader('Access-Control-Allow-Origin', origin);
+      res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
+      res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization');
+      res.setHeader('Access-Control-Allow-Credentials', 'true');
+      if (req.method === 'OPTIONS') return res.sendStatus(204);
+      return next();
+    }
+
+    // Widget routes: check user's DB whitelist
+    // Matches: GET  /api/settings/:userId
+    //          POST /api/logs/:userId
+    const widgetMatch = req.path.match(/^\/api\/(?:settings|logs)\/([0-9a-f-]{36})/i);
+    if (widgetMatch) {
+      const pool = getPool();
+      if (pool) {
+        const allowed = await getUserAllowedOrigins(pool, widgetMatch[1]);
+        // Empty list = unrestricted (user hasn't set any whitelist yet)
+        if (allowed.length === 0 || allowed.includes(origin)) {
+          res.setHeader('Access-Control-Allow-Origin', origin);
+          res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
+          res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization');
+          res.setHeader('Access-Control-Allow-Credentials', 'true');
+          if (req.method === 'OPTIONS') return res.sendStatus(204);
+          return next();
+        }
+      }
+    }
+
+    // Blocked
+    console.error(`CORS: origin "${origin}" not allowed for ${req.method} ${req.path}`);
+    res.status(403).json({ error: 'CORS: origin not allowed' });
+  };
+}
 
 // ── Inline migration SQL (all idempotent) ───────────────────────
 const MIGRATION_SQL = `
@@ -148,8 +202,10 @@ async function runMigrations(pool) {
 }
 
 // ── Middleware ──────────────────────────────────────────────────
-app.use(cors(corsOptions));
-app.options('*', cors(corsOptions)); // pre-flight for all routes
+// Pool is not available until start() resolves; use a getter so the
+// middleware closure always picks up the live instance.
+let _pool = null;
+app.use(buildCorsMiddleware(() => _pool));
 app.use(express.json());
 
 // Request logger
@@ -162,6 +218,8 @@ app.use((req, _res, next) => {
 app.use('/api/users',    usersRouter);
 app.use('/api/settings', settingsRouter);
 app.use('/api/logs',     logsRouter);
+// Expose cache invalidation so settings route can clear it on save
+app.locals.invalidateOriginCache = invalidateOriginCache;
 
 // Health check
 app.get('/health', (_req, res) => res.json({ status: 'ok' }));
@@ -182,6 +240,7 @@ async function start() {
 
   // Step 2 — connect to our DB and run migrations
   const pool = require('./db');
+  _pool = pool; // make available to dynamic CORS middleware
   try {
     await pool.query('SELECT 1');
     console.log('✅  PostgreSQL connected');
