@@ -30,9 +30,9 @@ async function fetchWidgetSettings(userId) {
 window.initChatbot = async function(config = {}) {
   const defaultConfig = {
     containerId: 'chatbot-root',
-    apiUrl:      process.env.REACT_APP_API_BASE_URL  || 'http://localhost:3001/api/v1',
-    typebotId:   process.env.REACT_APP_TYPEBOT_ID    || 'n7r13wu6szxrc82w46klq78e',
-    bearerToken: process.env.REACT_APP_BEARER_TOKEN  || '6YvtqmdZZR8BflsEaHSmRZcB',
+    apiUrl:      process.env.REACT_APP_API_BASE_URL  || '',
+    typebotId:   process.env.REACT_APP_TYPEBOT_ID    || '',
+    bearerToken: process.env.REACT_APP_BEARER_TOKEN  || '',
   };
 
   const finalConfig = { ...defaultConfig, ...config };
