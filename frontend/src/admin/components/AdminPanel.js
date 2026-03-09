@@ -6,7 +6,7 @@ import ScriptSettings from './sections/ScriptSettings';
 import LogsSection from './sections/LogsSection';
 import WorkflowSettings from './sections/WorkflowSettings';
 import WidgetPreview from './common/WidgetPreview';
-import { exportJSON } from '../utils/storage';
+import { exportJSON, importJSON } from '../utils/storage';
 import { apiGetSettings, apiSaveSettings, apiResetSettings } from '../utils/api';
 import defaultSettings from '../config/defaultSettings';
 import '../../styles/admin.css';
@@ -176,6 +176,17 @@ const AdminPanel = () => {
 
   const handleExport = () => exportJSON(settings);
 
+  const handleImport = async () => {
+    try {
+      const imported = await importJSON();
+      const merged = deepMerge(JSON.parse(JSON.stringify(defaultSettings)), imported);
+      setSettings(merged);
+      setSaved(false);
+    } catch (err) {
+      alert(err.message);
+    }
+  };
+
   const renderTab = () => {
     if (loadingSettings) return <div className="ap-loading">Loading settings...</div>;
     switch (activeTab) {
@@ -225,6 +236,7 @@ const AdminPanel = () => {
 
         <div className="ap-sidebar-footer">
           <button className="ap-btn ap-btn-export" onClick={handleExport}>Export JSON</button>
+          <button className="ap-btn ap-btn-export" onClick={handleImport}>Import JSON</button>
           <button className="ap-btn ap-btn-reset"  onClick={handleReset}>Reset</button>
           <button className="ap-btn ap-btn-reset"  onClick={handleLogout} style={{ marginTop: 4 }}>Logout</button>
         </div>
