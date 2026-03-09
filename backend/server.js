@@ -34,8 +34,6 @@ const corsOptions = {
 
 // ── Inline migration SQL (all idempotent) ───────────────────────
 const MIGRATION_SQL = `
-CREATE EXTENSION IF NOT EXISTS "pgcrypto";
-
 CREATE TABLE IF NOT EXISTS widget_users (
   id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name       VARCHAR(128) NOT NULL,
@@ -112,10 +110,41 @@ async function ensureDatabase() {
   }
 }
 
+async function tablesExist(pool) {
+  const { rows } = await pool.query(`
+    SELECT COUNT(*) AS count FROM information_schema.tables
+    WHERE table_schema = 'public' AND table_name = 'widget_users'
+  `);
+  return parseInt(rows[0].count, 10) > 0;
+}
+
 async function runMigrations(pool) {
-  console.log('🔄  Running migrations...');
-  await pool.query(MIGRATION_SQL);
-  console.log('✅  Migrations complete');
+  // Skip if tables are already in place (avoids permission errors on re-start)
+  if (await tablesExist(pool)) {
+    console.log('✅  Tables already exist — skipping migrations');
+    return;
+  }
+
+  console.log('🔄  Tables not found — running migrations...');
+
+  // pgcrypto requires superuser; try it but don't fail if denied
+  try {
+    await pool.query('CREATE EXTENSION IF NOT EXISTS "pgcrypto"');
+  } catch {
+    console.warn('⚠️   Could not create pgcrypto extension (needs superuser). Run manually:');
+    console.warn(`    sudo -u postgres psql -d ${DB_NAME} -c 'CREATE EXTENSION IF NOT EXISTS "pgcrypto";'`);
+  }
+
+  try {
+    await pool.query(MIGRATION_SQL);
+    console.log('✅  Migrations complete');
+  } catch (err) {
+    console.error('❌  Migration failed:', err.message);
+    console.error('    The database user lacks schema permissions. Fix it once with:');
+    console.error(`    sudo -u postgres psql -d ${DB_NAME} -c "GRANT ALL ON SCHEMA public TO ${process.env.DB_USER || 'chatbot_user'}; GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO ${process.env.DB_USER || 'chatbot_user'}; ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO ${process.env.DB_USER || 'chatbot_user'};"`);
+    console.error('    Then run: pm2 restart chatbot-backend --update-env');
+    process.exit(1);
+  }
 }
 
 // ── Middleware ──────────────────────────────────────────────────
