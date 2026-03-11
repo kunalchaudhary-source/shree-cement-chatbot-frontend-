@@ -6,9 +6,12 @@ import ChatService from '../services/ChatService';
 import '../styles/chatbot.css';
 
 const DEFAULT_WORKFLOW = {
-  apiBaseUrl:  process.env.REACT_APP_API_BASE_URL  || '',
-  typebotId:   process.env.REACT_APP_TYPEBOT_ID    || '',
-  bearerToken: process.env.REACT_APP_BEARER_TOKEN  || '',
+  startChatUrl:    process.env.REACT_APP_START_CHAT_URL    || '',
+  continueChatUrl: process.env.REACT_APP_CONTINUE_CHAT_URL || '',
+  bearerToken:     process.env.REACT_APP_BEARER_TOKEN       || '',
+  // legacy fields kept for backward compat
+  apiBaseUrl:      process.env.REACT_APP_API_BASE_URL       || '',
+  typebotId:       process.env.REACT_APP_TYPEBOT_ID         || '',
 };
 
 // Returns true when running on a mobile/touch device or narrow viewport
@@ -82,7 +85,7 @@ const ChatWidget = ({ widgetSettings = {}, userId = null, userName = null }) => 
   if (!isAllowedOnCurrentPage(workflow.allowedOrigins)) return null;
 
   // Apply workflow config to ChatService whenever settings change
-  useEffect(() => { ChatService.configure(workflow); }, [workflow.apiBaseUrl, workflow.typebotId, workflow.bearerToken]);
+  useEffect(() => { ChatService.configure(workflow); }, [workflow.startChatUrl, workflow.continueChatUrl, workflow.bearerToken, workflow.apiBaseUrl, workflow.typebotId]);
 
   const [chatState, setChatState]   = useState(
     behavior.autoOpen ? CHAT_STATES.OPEN : CHAT_STATES.CLOSED

@@ -48,10 +48,10 @@ const defaultSettings = {
     typingDuration: 1500, // minimum ms to show typing dots (0 = instant)
   },
   workflow: {
-    apiBaseUrl:     '',
-    typebotId:      '',
-    bearerToken:    '',
-    allowedOrigins: [],
+    startChatUrl:    '',
+    continueChatUrl: '',
+    bearerToken:     '',
+    allowedOrigins:  [],
   },
 };
 

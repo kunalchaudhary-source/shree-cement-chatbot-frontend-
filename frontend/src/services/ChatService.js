@@ -5,16 +5,39 @@ class ChatService {
     this.sessionId = null;
     this.isInitialized = false;
     // Runtime-configurable — overridden by configure()
-    this._apiBaseUrl   = API_BASE_URL;
-    this._typebotId    = TYPEBOT_ID;
-    this._bearerToken  = BEARER_TOKEN;
+    this._startChatUrl    = '';
+    this._continueChatUrl = '';
+    this._apiBaseUrl      = API_BASE_URL;
+    this._typebotId       = TYPEBOT_ID;
+    this._bearerToken     = BEARER_TOKEN;
   }
 
   // Call this whenever widget settings load / change
-  configure({ apiBaseUrl, typebotId, bearerToken } = {}) {
+  configure({ startChatUrl, continueChatUrl, bearerToken, apiBaseUrl, typebotId } = {}) {
+    // If the start URL changes, reset any active session so next open starts fresh
+    if (startChatUrl && startChatUrl !== this._startChatUrl) {
+      this.sessionId = null;
+      this.isInitialized = false;
+    }
+    // Direct URL mode (new)
+    if (startChatUrl)    this._startChatUrl    = startChatUrl;
+    if (continueChatUrl) this._continueChatUrl = continueChatUrl;
+    // Legacy fallback: construct URLs from base + id if direct URLs not set
     if (apiBaseUrl)  this._apiBaseUrl  = apiBaseUrl;
     if (typebotId)   this._typebotId   = typebotId;
     if (bearerToken) this._bearerToken = bearerToken;
+  }
+
+  _getStartUrl() {
+    if (this._startChatUrl) return this._startChatUrl;
+    return `${this._apiBaseUrl}/typebots/${this._typebotId}/startChat`;
+  }
+
+  _getContinueUrl(sessionId) {
+    if (this._continueChatUrl) {
+      return this._continueChatUrl.replace('<SESSION_ID>', sessionId);
+    }
+    return `${this._apiBaseUrl}/sessions/${sessionId}/continueChat`;
   }
 
   // Extract text content from rich text format
@@ -80,9 +103,9 @@ class ChatService {
 
   async startChat() {
     try {
-      console.log('🚀 Starting chat with API:', `${API_BASE_URL}/typebots/${TYPEBOT_ID}/preview/startChat`);
-      
-      const response = await fetch(`${this._apiBaseUrl}/typebots/${this._typebotId}/preview/startChat`, {
+      const url = this._getStartUrl();
+      console.log('🚀 Starting chat:', url);
+      const response = await fetch(url, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${this._bearerToken}`,
@@ -131,7 +154,7 @@ class ChatService {
     try {
       console.log('📤 Sending message:', message, 'to session:', this.sessionId);
       
-      const response = await fetch(`${this._apiBaseUrl}/sessions/${this.sessionId}/continueChat`, {
+      const response = await fetch(this._getContinueUrl(this.sessionId), {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${this._bearerToken}`,
